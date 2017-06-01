@@ -338,7 +338,9 @@ function shortText($text, $limit = 23) {
 
 function compressBooks() {
 
-    $dbFolder = DB_FOLDER;
+    global $baseDataFolder;
+    
+    $dbFolder = $baseDataFolder;
     
     //Create Folders
     system("mkdir $dbFolder/cbooks");

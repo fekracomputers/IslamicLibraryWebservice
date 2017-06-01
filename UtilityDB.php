@@ -333,8 +333,16 @@ class UtilityDB {
         $bookCard = addslashes(UtilityDB::dbBookInfo($bookDB,'bookcard'));
         
         //Add Book
-        $results = $mainDB->exec ("INSERT INTO books(id, title, information, card, adddate, accesscount) VALUES($bookID, '$bookTitle', '$bookInformation', '$bookCard', CURRENT_TIMESTAMP, 0);");
-        //if($results===false)die($bookDB->lastErrorMsg());
+        $statement = $mainDB->prepare("INSERT INTO books(id, title, information, card, adddate, accesscount) VALUES(:id, :title, :information, :card, CURRENT_TIMESTAMP, 0);");
+
+        $statement->bindValue(':id', $bookID, SQLITE3_INTEGER);
+        $statement->bindValue(':title', $bookTitle, SQLITE3_TEXT);
+        $statement->bindValue(':information', $bookInformation, SQLITE3_TEXT);
+        $statement->bindValue(':card', $bookCard, SQLITE3_TEXT);
+
+        $result = $statement->execute();
+        if($result===false)die($bookDB->lastErrorMsg());
+
 
         //Add Categories
 
@@ -580,7 +588,7 @@ class UtilityDB {
         $sqlStartAfter = "";
         if($startAfterID!=null)$sqlStartAfter = " AND id>$startAfterID";
         
-        $titles = UtilityDB::dbSQLRows(UtilityDB::getBookDB($bookID), "SELECT id, title, pageid FROM titles WHERE  1 $sqlTitleFilter $sqlParentFilter $sqlStartAfter ORDER BY id LIMIT $limit;", false);        
+        $titles = UtilityDB::dbSQLRows(UtilityDB::getBookDB($bookID), "SELECT id, title, pageid FROM titles WHERE  1 $sqlTitleFilter $sqlParentFilter $sqlStartAfter ORDER BY id LIMIT $limit;", true);        
         
         $titlesIDs = "";
         foreach ($titles as $title) {
