@@ -1,5 +1,13 @@
 Books API Web Service
 
+Test
+========================================
+Make [data] folder with write access to www-data or all
+Copy some books *.sqlite under [data\books] with read access to www-data or all
+try
+Comment the processCommand line and uncomment any test line, then execute
+First one will generate the main.sqlite database, later it works normally
+
 Version 1.0
 ========================================
 Date: 1/6/2017
