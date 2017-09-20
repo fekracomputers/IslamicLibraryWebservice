@@ -14,7 +14,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 if(file_exists($baseDataFolder."/main.sqlite")===false) {
     UtilityDB::generateMain();
 } else {
-    UtilityDB::syncMain();
+   // UtilityDB::syncMain();
 }
 
 echo WebService::processCommand($method, $request, $input);
