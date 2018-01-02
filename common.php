@@ -369,5 +369,3 @@ function compressBooks() {
         }
     }
 }
-
-?>

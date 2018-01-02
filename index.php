@@ -29,4 +29,3 @@ WebService::processCommand($method, $request, $input);
 //$keyWords = "انما الاعمال بالنيات وانما لكل امرئ ما نوى فمن كانت هجرته الى الله ورسوله فهجرته الى الله ورسوله ومن كانت هجرته لدنيا يصيبها او امراة يتزوجها فهجرته الى ما هاجر اليه";
 //echo WebService::processCommand("post", array("api", "search", 0, "more", 0), array("keywords"=>$keyWords, "option"=>"exact"));
 //echo WebService::processCommand("post", array("api", "getsimilarwords"), array("word"=>"الني", "limit"=>10));
-?>

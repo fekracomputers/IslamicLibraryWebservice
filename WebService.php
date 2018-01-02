@@ -356,14 +356,16 @@ class WebService {
   private static function successResponse($data, $options = 0, $code=200)
 	{
 		http_response_code ($code);
-		header("Content-Type: application/json; charset=UTF-8");
+		header("Content-Type: application/json; charset=UTF-8", $code);
+		header("Cache-Control: public", $code);
 		echo json_encode($data,$options);
 	}
 
 	protected static function errorResponse($HttpStatusCode,$title,$errorCode,$detail="")
 	{
-		http_response_code ($HttpStatusCode);
+    	http_response_code ($HttpStatusCode);
 		header("Content-Type: application/json; charset=UTF-8",$HttpStatusCode);
+		header("Cache-Control: public", $code);
 		echo json_encode([
 			"code"=>$errorCode,
 			"title"=>$title,

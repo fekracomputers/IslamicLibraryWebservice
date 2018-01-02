@@ -757,4 +757,3 @@ class UtilityDB {
         return UtilityDB::dbSQLArray(UtilityDB::getFTSDB(), "SELECT word FROM words WHERE word like ('%$word%') LIMIT $limit;", false);
     } 
 }
-?>
