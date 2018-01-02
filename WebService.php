@@ -1,23 +1,22 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * released under GPL-3
+ *
  */
 
 /**
- * Description of WebService
+ * Web servise for shamela books
  *
- * @author softlock
+ * @author fekra computers
  */
 class WebService {
-    
+
     public static function getCategories($request, $input)
     {
         $parentCategoryID = safeGetInt($request[2], null);
-            
-        $startAfterID = 0; 
+
+        $startAfterID = 0;
         $option = safeGetString($request[3], "");
         if($option=="more")$startAfterID = safeGetInt($request[4], 0);
 
@@ -40,14 +39,16 @@ class WebService {
             array_push($finalCategories, $finalCategory);
         }
 
-        return json_encode($finalCategories, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        return self::successResponse($finalCategories, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
 
     public static function getAuthors($request, $input)
     {
-        $startAfterID = 0; 
-        $option = safeGetString($request[2], "");
-        if($option=="more")$startAfterID = safeGetInt($request[3], 0);
+        $option="";
+        $startAfterID = 0;
+        if(array_key_exists(2, $request))
+          $option = safeGetString($request[2], "");
+        if($option=="more") $startAfterID = safeGetInt($request[3], 0);
 
         $keywords = safeGetString($input["keywords"], "");
         $limit = safeGetInt($input["limit"], MAX_RESULT_COUNT);
@@ -66,12 +67,12 @@ class WebService {
             array_push($finalAuthors, $finalAuthor);
         }
 
-        return json_encode($finalAuthors, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        return self::successResponse($finalAuthors, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
-    
+
     public static function getBooks($request, $input)
     {
-        $startAfterID = 0; 
+        $startAfterID = 0;
         $option = safeGetString($request[2], "");
         if($option=="more")$startAfterID = safeGetInt($request[3], 0);
 
@@ -89,7 +90,10 @@ class WebService {
         }
         else
         {
-            return json_encode(array("response"=>0, "reason"=>MSG_INVALID_REQUEST_FORMAT));
+           return self::errorResponse(400,
+           MSG_INVALID_REQUEST_FORMAT,
+           400,
+           "of must be author ,cateory or book");
         }
 
         $keywords = safeGetString($input["keywords"], "");
@@ -109,16 +113,16 @@ class WebService {
             array_push($finalCategories, $finalCategory);
         }
 
-        return json_encode($finalCategories, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        return self::successResponse($finalCategories, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
 
     public static function getSubjects($request, $input)
     {
         $bookID = safeGetInt($request[2], null);
-            
+
         $parentSubjectID = safeGetInt($request[3], null);
 
-        $startAfterID = 0; 
+        $startAfterID = 0;
         $option = safeGetString($request[4], "");
         if($option=="more")$startAfterID = safeGetInt($request[5], 0);
 
@@ -143,41 +147,43 @@ class WebService {
             array_push($finalSubjects, $finalSubject);
         }
 
-        return json_encode($finalSubjects, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        return self::successResponse($finalSubjects, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
 
     public static function saveUserPreference($request, $input)
     {
         $userEmail = safeGetString($input["useremail"], false);
         if($userEmail===false)
-            return json_encode(array("response"=>0, "reason"=>MSG_INVALID_REQUEST_FORMAT));
+           return self::errorResponse(400,MSG_INVALID_REQUEST_FORMAT,400,"missing useremail");
+
 
         $userPreferenceList = $input["userpreferencelist"];
         $userPreferenceList = json_encode($userPreferenceList, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-        
+
         $result = UtilityDB::saveUserPreference($userEmail, $userPreferenceList);
 
-        if($result===false)return json_encode(array("response"=>0, "reason"=>MSG_OPERATION_FAILED));
-        return json_encode(array("response"=>1));
+        if($result===false)
+          return self::errorResponse(500 ,MSG_OPERATION_FAILED,400);
+        return self::successResponse(array("response"=>1));
     }
-    
+
     public static function loadUserPreference($request, $input)
     {
         $userEmail = safeGetString($input["useremail"], false);
         if($userEmail===false)
-            return json_encode(array("response"=>0, "reason"=>MSG_INVALID_REQUEST_FORMAT));
+            return self::errorResponse(400,MSG_INVALID_REQUEST_FORMAT,400,"missing useremail");
 
         return UtilityDB::loadUserPreference($userEmail);
     }
-    
+
     public static function getBook($request, $input)
     {
         $bookID = safeGetInt($request[2], 0);
-        
+
         $book = UtilityDB::getBookInfo($bookID);
         if($book===false)
-            return json_encode(array("response"=>0, "reason"=>MSG_INVALID_INPUT));
-                        
+          return self::errorResponse(500 ,MSG_OPERATION_FAILED,500);
+
         $finalBook = new stdClass();
         $finalBook->id = $book["id"];
         $finalBook->title = $book["title"];
@@ -187,41 +193,41 @@ class WebService {
         $finalBook->partsnumbers = UtilityDB::getPartsNumbers($bookID);
         $finalBook->authors = UtilityDB::getBookAuthors($bookID);
         $finalBook->categories = UtilityDB::getBookCategories($bookID);
-        
-        return json_encode($finalBook, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+        return self::successResponse($finalBook, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
-        
+
     public static function getAuthor($request, $input)
     {
         $authorID = safeGetInt($request[2], 0);
-        
+
         $author = UtilityDB::getAuthorInfo($authorID);
         if($author===false)
-            return json_encode(array("response"=>0, "reason"=>MSG_INVALID_INPUT));
-        
+          return self::errorResponse(500 ,MSG_OPERATION_FAILED,500);
+
         $finalAuthor = new stdClass();
         $finalAuthor->id = $author["id"];
         $finalAuthor->title = $author["name"];
         $finalAuthor->information = $author["information"];
         $finalAuthor->birthhigriyear = $author["birthhigriyear"];
         $finalAuthor->deathhigriyear = $author["deathhigriyear"];
-        
-        return json_encode($finalAuthor, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+        return self::successResponse($finalAuthor, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
-    
+
     public static function getPage($request, $input)
     {
         $bookID = safeGetInt($request[2], null);
         $pageID = safeGetInt($request[3], null);
         if($bookID===null)
-            return json_encode(array("response"=>0, "reason"=>MSG_INVALID_REQUEST_FORMAT));
-        
+            return self::successResponse(array("response"=>0, "reason"=>MSG_INVALID_REQUEST_FORMAT));
+
         if($pageID===null){
             $pageID = intval(UtilityDB::getBookFirstPageID($bookID));
         }
-        
+
         $pageInfo = UtilityDB::getPageInfo($bookID, $pageID);
-        
+
         $page = new stdClass();
         $page->page = UtilityDB::getPage($bookID, $pageID);
         $page->pageid = $pageID;
@@ -231,28 +237,28 @@ class WebService {
         $page->previouspagenumber = UtilityDB::getBookPreviousPageID($bookID, $pageID);
         $page->nextpagenumber = UtilityDB::getBookNextPageID($bookID, $pageID);
         $page->lastpagenumber = UtilityDB::getBookLastPageID($bookID);
-                
-        return json_encode($page, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+        return self::successResponse($page, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
-    
+
     public static function getSimilarWords($request, $input)
     {
         $limit = safeGetInt($input["limit"], MAX_RESULT_COUNT);
         $word = safeGetString($input["word"], "");
         $word = mb_trim($word, " \r\n");
         if(mb_strlen($word)<4)
-            return json_encode(array("response"=>0, "reason"=>MSG_INVALID_INPUT));
-        
+            return self::errorResponse(400,MSG_INVALID_INPUT,400,"at least 4 words");
+
         $words = UtilityDB::getSimilarWords($word, $limit);
-        
-        return json_encode($words, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+        return self::successResponse($words, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
-    
+
     public static function search($request, $input)
     {
         $bookID = safeGetInt($request[2], 0);
-        
-        $startAfterID = 0; 
+
+        $startAfterID = 0;
         $option = safeGetString($request[3], "");
         if($option=="more")$startAfterID = safeGetInt($request[4], 0);
 
@@ -262,8 +268,8 @@ class WebService {
 
         $pages = UtilityDB::search($bookID, $keywords, $option, $startAfterID, $limit);
         if($pages===false)
-            return json_encode(array("response"=>0, "reason"=>MSG_FATURE_NOT_SUPPORTED));
-        
+          return self::errorResponse(501 ,MSG_FATURE_NOT_SUPPORTED,501);
+
         $booksIDs = array();
         foreach ($pages as $page)
         {
@@ -273,7 +279,7 @@ class WebService {
         $booksIDs = str_replace("[", "(", $booksIDs);
         $booksIDs = str_replace("]", ")", $booksIDs);
         $books = UtilityDB::getBooks("", "books", $booksIDs);
-        
+
         $finalPages = array();
         foreach ($pages as $page)
         {
@@ -288,60 +294,81 @@ class WebService {
 
             array_push($finalPages, $finalPage);
         }
-        
-        return json_encode($finalPages, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+        return self::successResponse($finalPages, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
 
     public static function processCommand($method, $request, $input)
     {
         if(count($request)<2 || strtolower($request[0])!="api")
-            return json_encode(array("response"=>0, "reason"=>MSG_INVALID_REQUEST_FORMAT));
+             return self::errorResponse(400,MSG_INVALID_REQUEST_FORMAT,400,"all requests must tart with api/");
 
         $command = strtolower($request[1]);
-        
+
         if($command=="getcategories")
         {
-            return WebService::getCategories($request, $input);
+            return self::getCategories($request, $input);
         }
         else if($command=="getauthors")
         {
-            return WebService::getAuthors($request, $input);
+            return self::getAuthors($request, $input);
         }
         else if($command=="getbooks")
         {
-            return WebService::getBooks($request, $input);
+            return self::getBooks($request, $input);
         }
         else if($command=="getbooksubjects")
         {
-            return WebService::getSubjects($request, $input);
+            return self::getSubjects($request, $input);
         }
         else if($command=="getbook")
         {
-            return WebService::getBook($request, $input);
+            return self::getBook($request, $input);
         }
         else if($command=="getauthor")
         {
-            return WebService::getAuthor($request, $input);
+            return self::getAuthor($request, $input);
         }
         else if($command=="search")
         {
-            return WebService::search($request, $input);
+            return self::search($request, $input);
         }
         else if($command=="getpage")
         {
-            return WebService::getPage($request, $input);
+            return self::getPage($request, $input);
         }
         else if($command=="saveuserpreference")
         {
-            return WebService::saveUserPreference($request, $input);
+            return self::saveUserPreference($request, $input);
         }
         else if($command=="loaduserpreference")
         {
-            return WebService::loadUserPreference($request, $input);
+            return self::loadUserPreference($request, $input);
         }
         else if($command=="getsimilarwords")
         {
-            return WebService::getSimilarWords($request, $input);
+            return self::getSimilarWords($request, $input);
+        }
+        else {
+           return self::errorResponse(400,MSG_INVALID_REQUEST_FORMAT,400,"unkown request name : (".$command.")");
         }
     }
+  private static function successResponse($data, $options = 0, $code=200)
+	{
+		http_response_code ($code);
+		header("Content-Type: application/json; charset=UTF-8");
+		echo json_encode($data,$options);
+	}
+
+	protected static function errorResponse($HttpStatusCode,$title,$errorCode,$detail="")
+	{
+		http_response_code ($HttpStatusCode);
+		header("Content-Type: application/json; charset=UTF-8",$HttpStatusCode);
+		echo json_encode([
+			"code"=>$errorCode,
+			"title"=>$title,
+			"status"=>$HttpStatusCode,
+			"detail"=>$detail,
+		]);
+	}
 }

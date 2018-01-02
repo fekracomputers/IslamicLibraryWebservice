@@ -1,8 +1,4 @@
 <?php
-header('HTTP/1.1 200 OK', TRUE);
-header("Status: 200");
-header("Content-Type: application/json; charset=UTF-8");
-//header("Content-Type: text/html; charset=UTF-8");
 include_once './common.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -14,10 +10,10 @@ $input = json_decode(file_get_contents('php://input'), true);
 if(file_exists($baseDataFolder."/main.sqlite")===false) {
     UtilityDB::generateMain();
 } else {
-   // UtilityDB::syncMain();
+//    UtilityDB::syncMain();
 }
 
-echo WebService::processCommand($method, $request, $input);
+WebService::processCommand($method, $request, $input);
 //echo WebService::processCommand("post", array("api", "getcategories", 0, "more", 0), array("keywords"=>""));
 //echo WebService::processCommand("post", array("api", "getauthors", "more", 184), array("keywords"=>""));
 //echo WebService::processCommand("post", array("api", "getbooks", "more", 0), array("keywords"=>"", "of"=>"category", "id"=>2));
