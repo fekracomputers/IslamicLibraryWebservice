@@ -8,6 +8,13 @@ try
 Comment the processCommand line and uncomment any test line, then execute
 First one will generate the main.sqlite database, later it works normally
 
+Version 2.0
+========================================
+Date: 1/26/2018
+By: Mohamed Sobh
+Notes:
+None
+
 Version 1.0
 ========================================
 Date: 1/6/2017

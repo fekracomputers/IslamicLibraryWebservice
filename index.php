@@ -5,14 +5,6 @@ $method = $_SERVER['REQUEST_METHOD'];
 $request = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $input = json_decode(file_get_contents('php://input'), true);
 
-//compressBooks();die();
-
-if(file_exists($baseDataFolder."/main.sqlite")===false) {
-    UtilityDB::generateMain();
-} else {
-//    UtilityDB::syncMain();
-}
-
 WebService::processCommand($method, $request, $input);
 //echo WebService::processCommand("post", array("api", "getcategories", 0, "more", 0), array("keywords"=>""));
 //echo WebService::processCommand("post", array("api", "getauthors", "more", 184), array("keywords"=>""));

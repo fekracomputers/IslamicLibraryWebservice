@@ -335,37 +335,3 @@ function shortText($text, $limit = 23) {
     if(mb_strlen($text)<($limit+3))return $text;
     return mb_substr($text, 0, $limit, 'utf8')."...";
 }
-
-function compressBooks() {
-
-    global $baseDataFolder;
-    
-    $dbFolder = $baseDataFolder;
-    
-    //Create Folders
-    system("mkdir $dbFolder/cbooks");
-    
-    echo '<p>';
-    system("zip $dbFolder/cbooks/main.zip $dbFolder/main.sqlite");
-    
-    $filesPaths = getFiles("$dbFolder/books", ".sqlite");
-    
-    $i = 0;
-                
-    foreach ($filesPaths as $filePath)
-    {
-        $i++;
-        
-        $bookID = basename($filePath, ".sqlite");
-        
-        if(file_exists("$dbFolder/cbooks/$bookID.zip"))
-        {
-            echo "<p>$i: File $bookID.zip exists";
-        }
-        else
-        {
-            echo "<p>$i:";
-            system("zip $dbFolder/cbooks/$bookID.zip $dbFolder/books/$bookID.sqlite");
-        }
-    }
-}
